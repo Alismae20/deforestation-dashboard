@@ -1,0 +1,19 @@
+# Railway Deployment Configuration
+# This file tells Railway how to run the application
+
+[build]
+# Python runtime version
+pythonVersion = "3.11"
+
+[env]
+# Flask environment variables
+FLASK_APP = "backend/app.py"
+FLASK_ENV = "production"
+PYTHONUNBUFFERED = "1"
+
+# API Configuration
+API_HOST = "0.0.0.0"
+API_PORT = "$PORT"
+
+# Disable Flask debugger in production
+DEBUG = "False"
