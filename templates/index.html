@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deforestation Detection Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌍 Deforestation Dashboard</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-section="upload">📁 Upload</button>
+                <button class="nav-item" data-section="explore">📊 Explore</button>
+                <button class="nav-item" data-section="train">🤖 Train Models</button>
+                <button class="nav-item" data-section="predictions">🔮 Predictions</button>
+                <button class="nav-item" data-section="export">💾 Export</button>
+            </nav>
+            <div class="sidebar-footer">
+                <p>ML Models: LSTM + Random Forest</p>
+                <p id="status-text">Ready to upload CSV</p>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Upload Section -->
+            <section id="upload" class="section active">
+                <div class="section-header">
+                    <h2>📁 Upload Deforestation Data</h2>
+                    <p>CSV format with forest loss data from 2001-2024</p>
+                </div>
+                
+                <div class="upload-area" id="upload-area">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 2v16m8-8H4" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M3 19h18" stroke-width="2"/>
+                    </svg>
+                    <p>Drag & drop your CSV file here</p>
+                    <p class="small-text">or</p>
+                    <button class="btn btn-primary" id="file-select-btn">Select File</button>
+                    <input type="file" id="file-input" accept=".csv" style="display: none;">
+                </div>
+
+                <div id="upload-info" class="info-box" style="display: none;">
+                    <p><strong>File uploaded:</strong> <span id="file-name"></span></p>
+                    <div id="data-summary"></div>
+                </div>
+
+                <div id="upload-error" class="error-box" style="display: none;"></div>
+            </section>
+
+            <!-- Explore Section -->
+            <section id="explore" class="section">
+                <div class="section-header">
+                    <h2>📊 Explore Forest Loss Trends</h2>
+                    <p>Analyze loss patterns from 2001 to 2024</p>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Total Forest Loss Over Time</h3>
+                        <canvas id="loss-trend-chart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Top 10 Municipalities by Loss</h3>
+                        <canvas id="top-municipalities-chart"></canvas>
+                    </div>
+                </div>
+
+                <div id="explore-error" class="error-box" style="display: none;"></div>
+            </section>
+
+            <!-- Train Models Section -->
+            <section id="train" class="section">
+                <div class="section-header">
+                    <h2>🤖 Train Machine Learning Models</h2>
+                    <p>Train Random Forest and LSTM models on uploaded data</p>
+                </div>
+
+                <div class="train-container">
+                    <button class="btn btn-success btn-large" id="train-btn">Start Training</button>
+                    <p id="train-status" class="status-text"></p>
+                </div>
+
+                <div id="metrics-container" style="display: none;">
+                    <h3>Model Performance Metrics</h3>
+                    
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h4>Random Forest Classification</h4>
+                            <div id="rf-metrics"></div>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4>LSTM Regression (Loss Prediction)</h4>
+                            <div id="lstm-reg-metrics"></div>
+                        </div>
+
+                        <div class="metric-card">
+                            <h4>LSTM Classification (Risk Prediction)</h4>
+                            <div id="lstm-clf-metrics"></div>
+                        </div>
+                    </div>
+
+                    <div class="training-history">
+                        <h4>LSTM Training History</h4>
+                        <canvas id="training-history-chart"></canvas>
+                    </div>
+                </div>
+
+                <div id="train-error" class="error-box" style="display: none;"></div>
+            </section>
+
+            <!-- Predictions Section -->
+            <section id="predictions" class="section">
+                <div class="section-header">
+                    <h2>🔮 Model Predictions</h2>
+                    <p>View predictions from Random Forest and LSTM models</p>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="rf-predictions">Random Forest</button>
+                    <button class="tab-btn" data-tab="lstm-reg-predictions">LSTM Regression</button>
+                    <button class="tab-btn" data-tab="lstm-clf-predictions">LSTM Classification</button>
+                </div>
+
+                <div id="rf-predictions" class="tab-content active">
+                    <h3>Random Forest Predictions (High/Low Risk)</h3>
+                    <table id="rf-table" class="results-table"></table>
+                </div>
+
+                <div id="lstm-reg-predictions" class="tab-content">
+                    <h3>LSTM Regression Predictions (2023 Loss in Ha)</h3>
+                    <table id="lstm-reg-table" class="results-table"></table>
+                </div>
+
+                <div id="lstm-clf-predictions" class="tab-content">
+                    <h3>LSTM Classification Predictions (Risk Probability)</h3>
+                    <table id="lstm-clf-table" class="results-table"></table>
+                </div>
+
+                <div id="predictions-error" class="error-box" style="display: none;"></div>
+            </section>
+
+            <!-- Export Section -->
+            <section id="export" class="section">
+                <div class="section-header">
+                    <h2>💾 Export Results</h2>
+                    <p>Download predictions as JSON</p>
+                </div>
+
+                <button class="btn btn-primary btn-large" id="export-btn">Export All Predictions as JSON</button>
+                <p id="export-status" class="status-text"></p>
+                <div id="export-error" class="error-box" style="display: none;"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
